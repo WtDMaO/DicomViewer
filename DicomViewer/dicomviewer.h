@@ -22,6 +22,7 @@ public:
 
 private:
     void dicomImgShow(QString loadFileName,int tempDicom);
+    void dicomTempImgShow(int tempDicom);
 
 private:
     int winWidth=0,winCenter=0;

@@ -73,25 +73,53 @@ void DicomViewer::dicomImgShow(QString fileName,int tempDicom){
         {
             Dicomfile.saveFile(to_string(tempDicom).c_str(), EXS_LittleEndianExplicit);
         }
+        DJDecoderRegistration::cleanup();
+
+        DicomImage *dicomFile=new DicomImage(to_string(tempDicom).c_str());
+
+        dicomFile->setWindow(winCenter,winWidth);
+
+        Uint8 *pixel=(Uint8*)(dicomFile->getOutputData(8));
+
+        cv::Mat dst(dicomFile->getWidth(),dicomFile->getHeight(),CV_8U,pixel);
+
+        QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
+
+        QImage img_scaled=img.scaled(img.size(),Qt::IgnoreAspectRatio);
+
+        if(tempDicom==TEMPDICOM1) ui->DicomShow1->setPixmap(QPixmap::fromImage(img_scaled));
+        else if(tempDicom==TEMPDICOM2) ui->DicomShow2->setPixmap(QPixmap::fromImage(img_scaled));
     }
-    DJDecoderRegistration::cleanup();
 
-    DicomImage *dicomFile=new DicomImage(to_string(tempDicom).c_str());
-
-    dicomFile->setWindow(winCenter,winWidth);
-
-    Uint8 *pixel=(Uint8*)(dicomFile->getOutputData(8));
-
-    cv::Mat dst(dicomFile->getWidth(),dicomFile->getHeight(),CV_8U,pixel);
-
-    QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
-
-    QImage img_scaled=img.scaled(img.size(),Qt::IgnoreAspectRatio);
-
-    if(tempDicom==TEMPDICOM1) ui->DicomShow1->setPixmap(QPixmap::fromImage(img_scaled));
-    else if(tempDicom==TEMPDICOM2) ui->DicomShow2->setPixmap(QPixmap::fromImage(img_scaled));
 
 }
+const char* itoa2(int val)
+{
+    static char result[sizeof(int)<<3+2];
+    sprintf(result,"%d",val);
+    return result;
+}
+
+void DicomViewer::dicomTempImgShow(int tempDicom){
+    DcmFileFormat dicomTempFile;
+    if(dicomTempFile.loadFile(itoa2(tempDicom)).good()){
+        DicomImage *dicomTempFile=new DicomImage(itoa2(tempDicom));
+
+        dicomTempFile->setWindow(winCenter,winWidth);
+
+        Uint8 *pixel=(Uint8*)(dicomTempFile->getOutputData(8));
+
+        cv::Mat dst(dicomTempFile->getWidth(),dicomTempFile->getHeight(),CV_8U,pixel);
+
+        QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
+
+        QImage img_scaled=img.scaled(img.size(),Qt::IgnoreAspectRatio);
+
+        if(tempDicom==TEMPDICOM1) ui->DicomShow1->setPixmap(QPixmap::fromImage(img_scaled));
+        else if(tempDicom==TEMPDICOM2) ui->DicomShow2->setPixmap(QPixmap::fromImage(img_scaled));
+    }
+}
+
 
 void DicomViewer::on_setLungWin_clicked()
 {
@@ -103,6 +131,8 @@ void DicomViewer::on_setLungWin_clicked()
     curWin=curWin+to_string(winWidth);
     ui->cur_WinCen->setText(QString::fromStdString(curCenter));
     ui->cur_WinWidth->setText(QString::fromStdString(curWin));
+    dicomTempImgShow(TEMPDICOM1);
+    dicomTempImgShow(TEMPDICOM2);
 }
 
 void DicomViewer::on_setMedisatWin_clicked()
@@ -115,4 +145,7 @@ void DicomViewer::on_setMedisatWin_clicked()
     curWin=curWin+to_string(winWidth);
     ui->cur_WinCen->setText(QString::fromStdString(curCenter));
     ui->cur_WinWidth->setText(QString::fromStdString(curWin));
+    dicomTempImgShow(TEMPDICOM1);
+    dicomTempImgShow(TEMPDICOM2);
 }
+

@@ -27,22 +27,6 @@
      <string>打开文件1</string>
     </property>
    </widget>
-   <widget class="QLabel" name="DicomShow1">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>10</y>
-      <width>512</width>
-      <height>512</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Box</enum>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="FileOpenButton2">
     <property name="geometry">
      <rect>
@@ -54,22 +38,6 @@
     </property>
     <property name="text">
      <string>打开文件2</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="DicomShow2">
-    <property name="geometry">
-     <rect>
-      <x>660</x>
-      <y>10</y>
-      <width>512</width>
-      <height>512</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Box</enum>
-    </property>
-    <property name="text">
-     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="setLungWin">
@@ -124,6 +92,39 @@
      <string>当前窗位：0</string>
     </property>
    </widget>
+   <widget class="QLabel" name="mousePos">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>200</y>
+      <width>54</width>
+      <height>12</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graphicsView1">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>10</y>
+      <width>522</width>
+      <height>522</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graphicsView2">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>10</y>
+      <width>522</width>
+      <height>522</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -131,7 +132,7 @@
      <x>0</x>
      <y>0</y>
      <width>1241</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -144,6 +145,17 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="fileOpen">
    <property name="text">
     <string>打开</string>

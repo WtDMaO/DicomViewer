@@ -30,10 +30,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        dicomviewer.cpp
+    dicomviewer.cpp
 
 HEADERS += \
-        dicomviewer.h
+        dicomviewer.h \
+    libMyAdd.h
 
 FORMS += \
         dicomviewer.ui
@@ -75,13 +76,30 @@ LIBS += -L"C:/Program Files/DCMTK/lib"\
     -lnetapi32 \
     -lwsock32 \
 }
+INCLUDEPATH += D:\MatLab\extern\include
+INCLUDEPATH += D:\MatLab\extern\include\win64
+
+OTHER_FILES +=libMyAdd.dll\
+              libMyAdd.lib
+
+LIBS += D:\MatLab\extern\lib\win64\microsoft\libmx.lib
+LIBS += D:\MatLab\extern\lib\win64\microsoft\mclmcr.lib
+LIBS += D:\MatLab\extern\lib\win64\microsoft\mclmcrrt.lib
+LIBS += D:\MatLab\extern\lib\win64\microsoft\libmat.lib
+LIBS += D:\MatLab\extern\lib\win64\microsoft\libmex.lib
+LIBS += D:\MatLab\extern\lib\win64\microsoft\libeng.lib
+LIBS += D:\QtWorkPlace\DicomViewer\libMyAdd.lib
+
 INCLUDEPATH += "C:/opencv/opencv/build/include" \
                "C:/opencv/opencv/build/include/opencv2" \
                "C:/opencv/opencv/build/include/opencv"
+
 CONFIG(release,debug|release){
     LIBS += "C:\opencv\opencv\build\x64\vc14\lib\opencv_world341.lib"
 }
 CONFIG(debug,debug|release){
     LIBS += "C:\opencv\opencv\build\x64\vc14\lib\opencv_world341d.lib"
 }
+
+
 

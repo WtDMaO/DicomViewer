@@ -3,6 +3,8 @@
 
 #pragma comment(lib, "Iphlpapi.lib")
 
+#pragma comment(lib, "libMyAdd.lib")
+
 
 int main(int argc, char *argv[])
 {

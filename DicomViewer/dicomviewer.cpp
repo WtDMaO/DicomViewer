@@ -1,10 +1,14 @@
 #include "dicomviewer.h"
 #include "ui_dicomviewer.h"
+#include "libMyAdd.h"
+
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QDebug>
-#include <QTextCodec>
-#include <QFile>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
+
+
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <dcmtk/config/osconfig.h>
@@ -29,7 +33,7 @@ DicomViewer::DicomViewer(QWidget *parent) :
     ui(new Ui::DicomViewer)
 {
     ui->setupUi(this);
-    setMouseTracking(true); //全局监控鼠标事件
+
 }
 
 DicomViewer::~DicomViewer()
@@ -40,7 +44,7 @@ DicomViewer::~DicomViewer()
 }
 
 //将dicom文件转换成cvmat,对dicommat1和dicommat2进行赋值
-cv::Mat DicomViewer::dicom2Cvmat(QString fileName,int tempFileName)
+void DicomViewer::dicom2Cvmat(QString fileName,int tempFileName)
 {
     //读取文件名和保存解压后的临时文件名
     string fileNamestr=fileName.toStdString();
@@ -71,50 +75,21 @@ cv::Mat DicomViewer::dicom2Cvmat(QString fileName,int tempFileName)
 
         cv::Mat dst(dicomFile->getWidth(),dicomFile->getHeight(),CV_8U,pixel);
 
-        if(tempFileName==TEMPDICOM1) dicomMat1==dst.clone();
-        if(tempFileName==TEMPDICOM2) dicomMat2==dst.clone();
-
-        return dst;
+        if(tempFileName==TEMPDICOM1) dst.copyTo(dicomMat1);
+        if(tempFileName==TEMPDICOM2) dst.copyTo(dicomMat2);
     }
 }
 
 
 //显示图像
 
-void DicomViewer::dicomImgShow(QString fileName,int tempDicom)
-{
-    cv::Mat dst=dicom2Cvmat(fileName,tempDicom);
-
-    QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
-
-    //QImage img_scaled=img.scaled(ui->graphicsView1->size(),Qt::IgnoreAspectRatio);
-
-    QGraphicsScene *scene=new QGraphicsScene;
-
-    scene->addPixmap(QPixmap::fromImage(img));
-
-    if(tempDicom==TEMPDICOM1)
-    {
-        ui->graphicsView1->setScene(scene);
-        ui->graphicsView1->resize(img.width()+10,img.height()+10);
-        ui->graphicsView1->show();
-    }
-    else if(tempDicom==TEMPDICOM2)
-    {
-        ui->graphicsView2->setScene(scene);
-        ui->graphicsView2->resize(img.width()+10,img.height()+10);
-        ui->graphicsView2->show();
-    }
-    scene->destroyed();
-}
-
 void DicomViewer::dicomImgShow(int tempDicom)
 {
-    cv::Mat dst=dicomWindowAdj(tempDicom);
+    cv::Mat dst;
+    if(tempDicom==TEMPDICOM1) dicomMat1.copyTo(dst);
+    if(tempDicom==TEMPDICOM2) dicomMat2.copyTo(dst);
 
     QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
-
-    //QImage img_scaled=img.scaled(ui->graphicsView1->size(),Qt::IgnoreAspectRatio);
 
     QGraphicsScene *scene=new QGraphicsScene;
 
@@ -122,25 +97,58 @@ void DicomViewer::dicomImgShow(int tempDicom)
 
     if(tempDicom==TEMPDICOM1)
     {
+        ui->graphicsView1->resetTransform();
         ui->graphicsView1->setScene(scene);
         ui->graphicsView1->resize(img.width()+10,img.height()+10);
-        qDebug()<<img.width();
         ui->graphicsView1->show();
     }
     else if(tempDicom==TEMPDICOM2)
     {
+        ui->graphicsView2->resetTransform();
         ui->graphicsView2->setScene(scene);
         ui->graphicsView2->resize(img.width()+10,img.height()+10);
         ui->graphicsView2->show();
     }
-    scene->destroyed();
+}
+
+void  DicomViewer::dicomImgShow(int tempDicom,int dx,int dy,int scale)
+{
+    cv::Mat dst;
+    if(tempDicom==TEMPDICOM1) dicomMat2.copyTo(dst);
+    if(tempDicom==TEMPDICOM2) dicomMat2.copyTo(dst);
+
+    QImage img=QImage((const uchar*)dst.data,dst.cols,dst.rows,dst.cols*dst.channels(),QImage::Format_Indexed8);
+
+
+    QGraphicsScene *scene=new QGraphicsScene;
+
+
+    scene->addPixmap(QPixmap::fromImage(img));
+
+    if(tempDicom==TEMPDICOM1)
+    {
+        ui->graphicsView1->setScene(scene);
+        ui->graphicsView1->resize(img.width()+10,img.height()+10);
+        ui->graphicsView1->centerOn(QPointF(dx,dy));
+        ui->graphicsView1->scale(scale,scale);
+        ui->graphicsView1->show();
+    }
+    else if(tempDicom==TEMPDICOM2)
+    {
+        ui->graphicsView2->resetTransform();
+        ui->graphicsView2->setScene(scene);
+        ui->graphicsView2->resize(img.width()+10,img.height()+10);
+        ui->graphicsView1->centerOn(QPointF(dx,dy));
+        ui->graphicsView1->scale(scale,scale);
+        ui->graphicsView2->show();
+    }
 }
 
 
 
 //刷新显示图像
 
-cv::Mat DicomViewer::dicomWindowAdj(int tempDicom)
+void DicomViewer::dicomWindowAdj(int tempDicom)
 {
       DcmFileFormat tempDicomFile;
       if(tempDicomFile.loadFile(to_string(tempDicom).c_str()).good()){
@@ -150,7 +158,8 @@ cv::Mat DicomViewer::dicomWindowAdj(int tempDicom)
           Uint8 *pixel=(Uint8*)(tempdimage->getOutputData(8));
 
           cv::Mat dst(tempdimage->getWidth(),tempdimage->getHeight(),CV_8U,pixel);
-          return dst;
+          if(tempDicom==TEMPDICOM1) dst.copyTo(dicomMat1);
+          if(tempDicom==TEMPDICOM2) dst.copyTo(dicomMat2);
       }
 }
 
@@ -166,8 +175,9 @@ void DicomViewer::on_FileOpenButton_clicked()
     {
         return;
     }
-
-    dicomImgShow(fileName,TEMPDICOM1);
+    ui->graphicsView1->resetTransform();
+    dicom2Cvmat(fileName,TEMPDICOM1);
+    dicomImgShow(TEMPDICOM1);
 }
 
 //打开文件2
@@ -181,8 +191,9 @@ void DicomViewer::on_FileOpenButton2_clicked()
     {
         return;
     }
-
-    dicomImgShow(fileName,TEMPDICOM2);
+    ui->graphicsView2->resetTransform();
+    dicom2Cvmat(fileName,TEMPDICOM2);
+    dicomImgShow(TEMPDICOM2);
 }
 
 //设置肺窗
@@ -196,6 +207,8 @@ void DicomViewer::on_setLungWin_clicked()
     curWin=curWin+to_string(winWidth);
     ui->cur_WinCen->setText(QString::fromStdString(curCenter));
     ui->cur_WinWidth->setText(QString::fromStdString(curWin));
+    dicomWindowAdj(TEMPDICOM1);
+    dicomWindowAdj(TEMPDICOM2);
     dicomImgShow(TEMPDICOM1);
     dicomImgShow(TEMPDICOM2);
 }
@@ -211,23 +224,52 @@ void DicomViewer::on_setMedisatWin_clicked()
     curWin=curWin+to_string(winWidth);
     ui->cur_WinCen->setText(QString::fromStdString(curCenter));
     ui->cur_WinWidth->setText(QString::fromStdString(curWin));
+    dicomWindowAdj(TEMPDICOM1);
+    dicomWindowAdj(TEMPDICOM2);
     dicomImgShow(TEMPDICOM1);
     dicomImgShow(TEMPDICOM2);
 }
 
-// 鼠标点击事件
-void DicomViewer::mousePressEvent(QMouseEvent *e)
+
+mwArray Mat2mwArray(cv::Mat src)
 {
-    if(Qt::LeftButton==e->button())
-    {
-        mouseX=e->x();
-        mouseY=e->y();
-    }
+    cv::Mat tempMat=src.clone();
+    mwSize dims[2]={src.cols,src.rows};
+    mwArray pMat(2,dims,mxUINT8_CLASS);
+
+    UINT8* x=(UINT8*)tempMat.data;
+    pMat.SetData(x,src.rows*src.cols);
+    return pMat;
 }
 
-//鼠标移动事件
-void DicomViewer::mouseMoveEvent(QMouseEvent *e)
+cv::Mat mwArry2Mat(mwArray src)
 {
-    mouseX_m=e->x();
-    mouseY_m=e->y();
+    mwArray dims=src.GetDimensions();
+
+
+
+    int M=dims(1);
+    int N=dims(2);
+    cv::Mat image(M,N,CV_8UC1);
+
+    for(int i=0;i<M;i++)
+    {
+        for(int j=0;j<N;j++)
+        {
+            int index=src(i+1,j+1);
+            image.row(j).col(i).data[0]=index;
+        }
+    }
+    return image;
+}
+
+void DicomViewer::on_pushButton_clicked()
+{
+    if(libMyAddInitialize()){
+        mwArray dicomArray2;
+        c_matlab(1,dicomArray2,Mat2mwArray(dicomMat1));
+        mwArry2Mat(dicomArray2).copyTo(dicomMat2);
+        dicomImgShow(TEMPDICOM2);
+        libMyAddTerminate();
+    }
 }

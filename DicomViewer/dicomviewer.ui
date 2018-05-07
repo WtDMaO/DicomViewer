@@ -92,19 +92,6 @@
      <string>当前窗位：0</string>
     </property>
    </widget>
-   <widget class="QLabel" name="mousePos">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>200</y>
-      <width>54</width>
-      <height>12</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="graphicsView1">
     <property name="geometry">
      <rect>
@@ -123,6 +110,19 @@
       <width>522</width>
       <height>522</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>210</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>增强</string>
     </property>
    </widget>
   </widget>

@@ -16,6 +16,7 @@
 
 namespace Ui {
 class DicomViewer;
+class GraphicView;
 }
 
 class DicomViewer : public QMainWindow
@@ -25,33 +26,27 @@ class DicomViewer : public QMainWindow
 public:
     explicit DicomViewer(QWidget *parent = 0);
 
+    double mouseX=0,mouseY=0;
 
+    double mouseX_m=0.,mouseY_m=0;
 
     ~DicomViewer();
 
 private:
-    void dicomImgShow(QString loadFileName,int tempDicom);
-
     void dicomImgShow(int tempDicom);
 
-    cv::Mat dicomWindowAdj(int tempDicom);
+    void dicomImgShow(int tempDicom,int dx,int dy,int scale);
 
-    void mouseMoveEvent(QMouseEvent *e);
-
-    void mousePressEvent(QMouseEvent *e);
+    void dicomWindowAdj(int tempDicom);
 
     //dicom文件转换成Qimage,根据tempFileName的值对应给全局变量dicomMat1和2赋值
-    cv::Mat dicom2Cvmat(QString fileName,int tempFileName);
+    void dicom2Cvmat(QString fileName,int tempFileName);
 
 
 private:
     int winWidth=0,winCenter=0;
 
     int currentSize=512;
-
-    double mouseX=0,mouseY=0;
-
-    double mouseX_m=0.,mouseY_m=0;
 
     cv::Mat dicomMat1,dicomMat2;
 
@@ -65,8 +60,12 @@ private slots:
     void on_setMedisatWin_clicked();
 
 
+
+    void on_pushButton_clicked();
+
 private:
     Ui::DicomViewer *ui;
 };
+
 
 #endif // DICOMVIEWER_H

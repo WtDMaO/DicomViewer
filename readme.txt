@@ -14,3 +14,6 @@ if wanna communicate with me, contact wutongxiaomo@gmail.com.
 -Vision 0.2.1 
 	not added any new function
 	change the picture showing for QLable to QtGraphicViewer
+	
+-Vision 0.3 
+	Adding a Matlab function to enhance the image.
